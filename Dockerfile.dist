@@ -1,0 +1,6 @@
+FROM bloben/electron:latest AS build
+
+COPY . ./
+
+FROM scratch AS export-stage
+COPY --from=build /build/dist ./

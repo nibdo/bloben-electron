@@ -1,0 +1,169 @@
+{
+  "name": "Bloben",
+  "version": "0.19.0-beta.1",
+  "author": {
+    "name": "nibdo",
+    "email": "hello@nibdo.com"
+  },
+  "license": "GPL",
+  "homepage": "https://bloben.com",
+  "email": "hello@nibdo.com",
+  "description": "Calendar with support for CalDAV and webcal",
+  "main": "./build/src/main.js",
+  "private": true,
+  "dependencies": {
+    "@electron-forge/maker-flatpak": "^6.0.4",
+    "@types/electron-devtools-installer": "2.2.0",
+    "@types/jest": "27.0.2",
+    "axios": "1.1.3",
+    "bcryptjs": "2.4.3",
+    "bloben-interface": "0.0.22-beta.1",
+    "body-parser": "1.20.1",
+    "bullmq": "3.4.0",
+    "celebrate": "15.0.1",
+    "connect-redis": "6.1.3",
+    "cookie-parser": "1.4.6",
+    "cors": "2.8.5",
+    "cron": "2.1.0",
+    "cross-fetch": "3.1.5",
+    "crypto-js": "4.1.1",
+    "datez": "0.0.6",
+    "dotenv": "16.0.3",
+    "electron-devtools-installer": "3.2.0",
+    "electron-installer-flatpak": "0.8.0",
+    "electron-is-dev": "2.0.0",
+    "electron-json-storage": "4.5.0",
+    "electron-log": "4.4.8",
+    "electron-window-state": "5.0.3",
+    "express": "4.18.2",
+    "express-session": "1.17.3",
+    "helmet": "6.0.1",
+    "http-errors": "2.0.0",
+    "http-proxy-middleware": "2.0.6",
+    "ical-js-parser": "0.7.4-beta.3",
+    "imapflow": "1.0.117",
+    "ioredis": "5.2.4",
+    "ipc-express-fork": "0.4.4",
+    "joi": "17.7.0",
+    "kalend": "0.17.5",
+    "lodash": "4.17.21",
+    "luxon": "3.1.1",
+    "mailparser": "3.5.0",
+    "morgan": "1.10.0",
+    "nodemailer": "6.8.0",
+    "otplib": "12.0.1",
+    "pg": "8.8.0",
+    "rrule": "2.7.1",
+    "socket.io": "4.5.4",
+    "sqlite3": "5.1.4",
+    "tsdav": "2.0.3",
+    "typeorm": "0.3.11",
+    "typescript": "4.3.4",
+    "uuid": "9.0.0",
+    "vcf": "2.1.1",
+    "web-vitals": "2.1.2",
+    "winston": "3.8.2",
+    "winston-daily-rotate-file": "4.7.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build-old": "tsc -p src  && cp -r src/api build/src && cp -r src/client build/src",
+    "build": "tsc --outDir build -p src && cp -r src/icons build/ && cp -r src/html build/src",
+    "build-dev": "npm run build && cp -r src/api build/src && cp -r src/calendar build/src && cp package.json build",
+    "test": "react-scripts test",
+    "postinstall": "electron-builder install-app-deps",
+    "dev": " npm run build && electron .",
+    "electron:dev": "concurrently \\\"cross-env BROWSER=none npm start\\\" && tsc -p src -w\\\" && electron .\\\"",
+    "electron:build": "rm -r api && rm -r dist && npm run build && tsc -p src && cp src/worker.html api/electron && electron-builder",
+    "eject": "react-scripts eject",
+    "build:deb_old": "electron-packager ./build --src build --platform linux --arch x64 --out dist/",
+    "deb64": "electron-installer-debian --src build/ --dest dist/installers/ --arch amd64",
+    "electron:deb": "electron-builder --x64 --linux deb",
+    "electron:linux": "electron-builder --x64 --linux snap deb AppImage",
+    "electron:win": "electron-builder --x64 --win",
+    "electron:snap": "electron-builder --x64 --linux snap",
+    "build:linux": "DOCKER_BUILDKIT=1 docker build -f Dockerfile.dist --output dist/$npm_package_version .",
+    "sign:local": "sh sign.sh $npm_package_version",
+    "build:release": "docker build -f Dockerfile -t bloben/electron:latest .",
+    "build:electron": "DOCKER_BUILDKIT=1 docker build -f Dockerfile.local --output dist/$npm_package_version .",
+    "build:export": "DOCKER_BUILDKIT=1 docker build -f Dockerfile.dist --output dist/$npm_package_version .",
+    "build:local": "npm run build:electron && npm run sign:local"
+  },
+  "config": {
+    "snap": {
+      "confinement": "strict",
+      "summary": "Calendar with support for CalDAV and Webcals and tasks",
+      "grade": "devel",
+      "title": "Bloben",
+      "plugs": ["x11", "wayland", "unity7", "opengl", "network", "gsettings", "desktop", "browser-support", "audio-playback", "gtk-common-themes:gtk-3-themes", "gtk-common-themes:icon-themes", "gtk-common-themes:sound-themes"]
+    },
+    "forge": {
+      "packagerConfig": {
+        "asar": false,
+        "dir": "./"
+      }
+    }
+  },
+  "build": {
+    "artifactName": "bloben-${version}.${ext}",
+    "snap": {
+      "confinement": "strict",
+      "summary": "Calendar with support for CalDAV and Webcals and tasks",
+      "grade": "devel",
+      "title": "Bloben"
+    },
+    "extends": null,
+    "files": [
+      "src/**/*",
+      "src/api/**/*",
+      "src/calendar/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "src/main.js"
+    },
+    "directories": {
+      "buildResources": "assets"
+    },
+    "extraResources": [
+      "electron/preload.js"
+    ]
+  },
+  "extraResources": [
+    "electron/preload.js"
+  ],
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/electron-json-storage": "4.5.0",
+    "@typescript-eslint/eslint-plugin": "5.47.0",
+    "@typescript-eslint/parser": "5.47.0",
+    "concurrently": "6.4.0",
+    "cross-env": "7.0.3",
+    "electron": "22.0.0",
+    "electron-builder": "23.6.0",
+    "electron-installer-debian": "3.1.0",
+    "electron-packager": "17.1.1",
+    "eslint-config-prettier": "4.3.0",
+    "eslint-config-react": "1.1.7",
+    "eslint-plugin-prettier": "3.3.1",
+    "prettier": "2.0.5",
+    "wait-on": "6.0.0"
+  }
+}

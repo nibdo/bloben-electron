@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html style="height:100%;width: 100%;">
+<head>
+    <meta charset="UTF-8">
+    <title>Network</title>
+</head>
+<body style="height:100%;width: 100%;overflow-x: hidden;overflow-y:scroll">
+<script>
+    const fs = require('fs')
+    const os = require('os')
+
+    let fileJSON = '[';
+    let fileContent = fs.readFileSync(`${os.tmpdir()}/bloben_cache/network.log`, 'utf8')
+    const fileContentArray = fileContent.split('\n');
+    fileContent = fileContentArray.join(',');
+     fileJSON += fileContent.slice(0, fileContent.length - 1);
+    fileJSON += ']';
+    fileJSON = JSON.parse(fileJSON);
+
+    const dataParsed = []
+
+    // group by requestID
+    const obj = {}
+
+    for (let i=0; i< fileJSON.length; i++) {
+        const item = fileJSON[i]
+
+        if (!obj[item.responseID]) {
+            obj[item.responseID] = {}
+        }
+
+            if (item.type === 'response') {
+                obj[item.responseID].response = item
+            } else {
+                obj[item.responseID].request = item
+            }
+    }
+
+    const toArray = Object.entries(obj)
+
+    const createTableRow = () => {
+        const row = document.createElement("div")
+        row.style.display = "flex"
+        row.style.flexDirection = "row"
+        // row.style.borderBottom = 'solid 0.4px gray'
+        row.style.marginBottom = '10px'
+        row.style.alignItems = 'center'
+
+        return row
+    }
+
+    const createColumn = (content) => {
+        const element = document.createElement("div")
+        element.style.display = "flex"
+        element.style.marginRight = "8px"
+
+        if (content) {
+            element.innerText = content
+        }
+
+        return element
+    }
+
+    const addPadding = (value) => {
+        if (String(value).length === 1) {
+            return `0${value}`
+        }
+
+        return value
+    }
+
+    const createRowWithContent = (item) => {
+        const row = createTableRow()
+
+        let datetime = ''
+        if (item.request?.timestamp) {
+            const date = new Date(item.request?.timestamp)
+            datetime = `${date.getFullYear()}-${addPadding(date.getMonth() + 1)}-${addPadding(date.getDate())} ${addPadding(date.getHours())}:${addPadding(date.getMinutes())}:${addPadding(date.getSeconds())}`
+        }
+
+        const timestamp = createColumn(datetime)
+        timestamp.style.fontSize = '12px'
+        timestamp.style.minWidth = '105px'
+
+        const path = createColumn(item?.request?.path)
+
+        const method = createColumn(item?.request?.method?.toUpperCase())
+
+        method.style.fontWeight = 'bold'
+        method.style.color = 'white'
+
+        method.style.minWidth = '60px'
+        method.style.width = '60px'
+        method.style.height = '35px'
+        method.style.marginRight = '16px'
+        method.style.borderRadius = '8px'
+        method.style.display = 'flex'
+        method.style.alignItems = 'center'
+        method.style.justifyContent = 'center'
+
+        const status = Number(item?.response?.status)
+        if (status && status < 300) {
+            method.style.background = 'green'
+        }  else {
+            method.style.background = 'red'
+        }
+
+
+
+        row.appendChild(timestamp)
+        row.appendChild(method)
+        row.appendChild(path)
+
+        if (status && status >= 300) {
+            const statusCode = createColumn(item?.response?.status)
+            statusCode.style.fontSize = '12px'
+            statusCode.style.marginLeft = '8px'
+
+            row.appendChild(statusCode)
+        }
+
+        return row
+    }
+
+    const table = document.createElement("div")
+    table.style.width = "100%"
+    table.style.height = "100%"
+    table.style.padding = "2px"
+    table.style.display = "flex"
+    table.style.flexDirection = "column"
+
+    if (toArray?.length) {
+        for (let i=0; i<toArray.length; i++) {
+            const item = toArray[i]?.[1]
+
+            if (item) {
+                const row = createRowWithContent(item)
+
+                table.appendChild(row)
+            }
+
+        }
+    }
+
+    document.body.appendChild(table);
+</script>
+</body>
+</html>

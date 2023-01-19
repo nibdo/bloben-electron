@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+</head>
+<body style="height: 100%;width: 100%;overflow: hidden">
+<script>
+    const packageFile = require(__dirname + "/../../package.json")
+
+    const container = document.createElement("div")
+    container.style.width = "100%"
+    container.style.height = "100%"
+    container.style.padding = "8px"
+    container.style.textAlign = "center"
+
+    // title
+    const title = document.createElement("h4")
+    title.innerText = "Bloben"
+    title.style.fontWeight = "bold"
+    title.style.fontSize = "20px"
+    container.appendChild(title);
+
+    const version = document.createElement("h6")
+    version.innerText = packageFile?.version
+    version.style.fontWeight = "bold"
+    version.style.fontSize = "14px"
+    container.appendChild(version);
+
+    document.body.appendChild(container);
+</script>
+</body>
+</html>

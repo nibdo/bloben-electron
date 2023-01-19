@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>About</title>
+  </head>
+  <body style="height: 100%; width: 100%; overflow: hidden;">
+    <script>
+      const electron = require("electron");
+      const { ipcRenderer } = electron;
+      const { IpcServer } = require("ipc-express-fork");
+      const { createElectronApp } = require("../../src/api");
+      const { log } = require("../../src/logger");
+
+      const startServer = () => {
+        const ipc = new IpcServer(ipcRenderer);
+
+        const sendMsg = (channel, data) => {
+          ipcRenderer.send("api-socket", data);
+        };
+
+        log("Will init express app");
+
+        createElectronApp(sendMsg)
+          .then((blobenApp) => {
+            log("Express app initialized");
+
+            ipc.listen(blobenApp);
+
+            log("IPC main listening to Express app");
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      };
+
+      const init = () => {
+        try {
+          startServer();
+        } catch (e) {
+          console.log(e);
+          log(e.message);
+        }
+      };
+
+      init();
+    </script>
+  </body>
+</html>
