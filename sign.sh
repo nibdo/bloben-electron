@@ -13,7 +13,7 @@ do
   echo $filename
 
   # sign file
-  gpg --detach-sign --armor --local-user D4EE9ABB9B82D5CE --output $folder/$filename.asc $folder/$filename
+  gpg --detach-sign --armor --local-user 67EE793933D091F6 --output $folder/$filename.asc $folder/$filename
 
   # verify signature
   output=$(gpg --verify $folder/$filename.asc $folder/$filename)
